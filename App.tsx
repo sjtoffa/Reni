@@ -4,6 +4,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from './lib/firebase';
 import LoginScreen from './app/login';
 import SignupScreen from './app/signup';
+import MainApp from './app/MainApp';
 
 type Screen = 'login' | 'signup' | 'google-auth';
 
@@ -29,12 +30,7 @@ export default function App() {
   }
 
   if (user) {
-    // Placeholder until main app screens are built
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#5b372d" />
-      </View>
-    );
+    return <MainApp />;
   }
 
   if (screen === 'signup') {
