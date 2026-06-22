@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  SafeAreaView, Dimensions,
+  SafeAreaView, Dimensions, Animated,
 } from 'react-native';
 import Svg, { Path, Circle, Rect, Line } from 'react-native-svg';
 
@@ -37,6 +37,16 @@ function SmallIcon({ d, size = 11 }: { d: string; size?: number }) {
 
 export default function ProfileScreen() {
   const [activeTab, setActiveTab] = useState(0);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  function switchTab(idx: number) {
+    setActiveTab(idx);
+    Animated.timing(slideAnim, {
+      toValue: -idx * SCREEN_WIDTH,
+      duration: 280,
+      useNativeDriver: true,
+    }).start();
+  }
 
   const tabWidth = SCREEN_WIDTH;
 
@@ -88,8 +98,8 @@ export default function ProfileScreen() {
       {/* Tab row */}
       <View style={styles.tabRow}>
         {['About You', 'Posts', 'Saved'].map((tab, i) => (
-          <TouchableOpacity key={tab} style={styles.tabItem} onPress={() => setActiveTab(i)}>
-            <Text style={[styles.tabLabel, activeTab === i && styles.tabLabelActive]}>{tab}</Text>
+          <TouchableOpacity key={tab} style={styles.tabItem} onPress={() => switchTab(i)}>
+            <Text style={[styles.tabLabel, activeTab === i && styles.tabLabelActive]} onPress={() => switchTab(i)}>{tab}</Text>
             {activeTab === i && <View style={styles.tabIndicator} />}
           </TouchableOpacity>
         ))}
@@ -97,7 +107,7 @@ export default function ProfileScreen() {
 
       {/* Sliding panels */}
       <View style={styles.panelContainer}>
-        <View style={[styles.panelTrack, { transform: [{ translateX: -activeTab * SCREEN_WIDTH }] }]}>
+        <Animated.View style={[styles.panelTrack, { transform: [{ translateX: slideAnim }] }]}>
 
           {/* Panel 0: About You */}
           <ScrollView style={[styles.panel, { width: tabWidth }]} showsVerticalScrollIndicator={false}>
@@ -164,7 +174,7 @@ export default function ProfileScreen() {
             <View style={{ height: 32 }} />
           </ScrollView>
 
-        </View>
+        </Animated.View>
       </View>
     </SafeAreaView>
   );
@@ -211,7 +221,6 @@ const styles = StyleSheet.create({
   panelContainer: { flex: 1, overflow: 'hidden' },
   panelTrack: {
     flexDirection: 'row', flex: 1,
-    transition: 'transform 0.28s',
   },
   panel: { flexShrink: 0 },
 
