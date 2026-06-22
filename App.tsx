@@ -1,19 +1,53 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from './lib/firebase';
+import LoginScreen from './app/login';
+import SignupScreen from './app/signup';
+
+type Screen = 'login' | 'signup' | 'google-auth';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+  const [user, setUser] = useState<User | null>(null);
+  const [checking, setChecking] = useState(true);
+  const [screen, setScreen] = useState<Screen>('login');
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setChecking(false);
+    });
+    return unsub;
+  }, []);
+
+  if (checking) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#5b372d" />
+      </View>
+    );
+  }
+
+  if (user) {
+    // Placeholder until main app screens are built
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#5b372d" />
+      </View>
+    );
+  }
+
+  if (screen === 'signup') {
+    return <SignupScreen onNavigate={(s) => setScreen(s as Screen)} />;
+  }
+
+  return <LoginScreen onNavigate={(s) => setScreen(s as Screen)} />;
 }
 
 const styles = StyleSheet.create({
-  container: {
+  loading: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fdf7f4',
     alignItems: 'center',
     justifyContent: 'center',
   },
